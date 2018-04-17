@@ -61,8 +61,15 @@ print("restofFrames:\t%d" % restofFrames)
 # blockOFrames = int(numberofFrames/]3)
 # **********************************************************************************************************************
 
-t = np.linspace(0,vlength, vlength*sampRate,False)
+x = np.linspace(0,vlength, int(vlength * sampRate),False)
+voice_data = np.sin((x/(sampRate/trans_freq)/np.pi)*np.sin(x/E_freq)*np.sin(x/sampRate))
+voice = np.hstack(voice_data)
+voice *= 32767 / np.max(np.abs(voice_data))
+voice = voice.astype(np.int16)
 
+play_obj = sa.play_buffer(voice,1,1,sampRate)
+
+play_obj.wait_done()
 
 
 
