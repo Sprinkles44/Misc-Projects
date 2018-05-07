@@ -4,16 +4,16 @@ from scipy import stats
 import math
 import pyaudio # sudo apt-get python3-pyaudio
 
-import simpleaudio as sa
+# import simpleaudio as sa
 
 PyAudio = pyaudio.PyAudio
 sampRate = 48000  # Voice sample rate
-print("sampRate:\t\t%d" % sampRate)
+# print("sampRate:\t\t%d" % sampRate)
 fundFreq = 211  # Fundamental frequency from human voice sample
 # domFreq = 3000  # Dominant frequency from human voice sample
 
 sVal = []
-with open('sensorLogTestValues3.txt','r') as file:
+with open('sensorLogTestValues.txt','r') as file:
 	for line in file:
 		sVal.append(file.readline())
 
@@ -46,34 +46,35 @@ sVal = [int(i) for i in sVal]
 # **********************************************************************************************************************
 
 E_freq = int(np.mean(sVal))  # Avg of captured sensor values will become the frequency of Emmit's voice
-print("E_freq:\t\t\t%d" % E_freq)
+# print("E_freq:\t\t\t%d" % E_freq)
+
 # avg_freq = (E_freq+fundFreq)/2  # Initial voice frequency
 trans_freq = (fundFreq+E_freq)/2  # Transitioning voice frequency
+
 slope, intercept, r_value, p_value, std_err = stats.linregress(np.arange(len(sVal)),sVal)  # Determines the rate of change of the frequency
-print("slope:\t\t\t%.2f\nintercept:\t\t%.2f\nr_value:\t\t%.2f\np_value:\t\t%.2f\nstd_err:\t\t%.2f" % (slope,intercept,r_value,p_value,std_err))
+# print("slope:\t\t\t%.2f\nintercept:\t\t%.2f\nr_value:\t\t%.2f\np_value:\t\t%.2f\nstd_err:\t\t%.2f" % (slope,intercept,r_value,p_value,std_err))
+
 vlength = .75 + (1/slope) # Length of the output voice in seconds
-print("vlength:\t\t%.2f" % vlength)
+# print("vlength:\t\t%.2f" % vlength)
+
 numberofFrames = int(sampRate * vlength)
-print("numberofFrames:\t%d" % numberofFrames)
+# print("numberofFrames:\t%d" % numberofFrames)
+
 restofFrames = numberofFrames % sampRate
-print("restofFrames:\t%d" % restofFrames)
+# print("restofFrames:\t%d" % restofFrames)
+
 # **********************************************************************************************************************
 # blockOFrames = int(numberofFrames/]3)
 # **********************************************************************************************************************
-
-x = np.linspace(0,vlength, int(vlength * sampRate),False)
-voice_data = np.sin((x/(sampRate/trans_freq)/np.pi)*np.sin(x/E_freq)*np.sin(x/sampRate))
-voice = np.hstack(voice_data)
-voice *= 32767 / np.max(np.abs(voice_data))
-voice = voice.astype(np.int16)
-
-play_obj = sa.play_buffer(voice,1,1,sampRate)
-
-play_obj.wait_done()
-
-
-
-
+# x = np.linspace(0,vlength, int(vlength * sampRate),False)
+# voice_data = np.sin((x/(sampRate/trans_freq)/np.pi)*np.sin(x/E_freq)*np.sin(x/sampRate))
+# voice = np.hstack(voice_data)
+# voice *= 32767 / np.max(np.abs(voice_data))
+# voice = voice.astype(np.int16)
+#
+# play_obj = sa.play_buffer(voice,1,1,sampRate)
+#
+# play_obj.wait_done()
 # **********************************************************************************************************************
 # m = (E_freq - fundFreq)/(2*vlength)  # m = (ending_freq - beginning_freq)/(2*duration)
 # print("m:\t\t\t%.2f" % m)
@@ -92,9 +93,11 @@ play_obj.wait_done()
 # modulation = 20  # Hard coded voice modulation
 # **********************************************************************************************************************
 # **********************************************************************************************************************
-# voicedata = ''
-# for x in range(numberofFrames + restofFrames):
-# 	voicedata = voicedata + chr(int(math.sin((x/(sampRate/trans_freq)/math.pi)*math.sin(x/E_freq)*math.sin(x/sampRate+slope))*127+128))
+
+voicedata = ''
+for x in range(numberofFrames + restofFrames):
+	voicedata = voicedata + chr(int(math.sin((x/(sampRate/trans_freq)/math.pi)*math.sin(x/E_freq)*math.sin(x/sampRate+slope))*127+128))
+
 # **********************************************************************************************************************
 # **********************************************************************************************************************
 #
@@ -135,14 +138,14 @@ play_obj.wait_done()
 # with p.open("Emmit'sActualVoice.wav",'w+') as wavfile:
 # 	wavfile.write(voicedata)
 # **********************************************************************************************************************
-# p = PyAudio()
-# stream = p.open(format = p.get_format_from_width(1),
-# 				channels = 1,
-# 				rate = sampRate,
-# 				output = True)
-#
-# stream.write(voicedata)
-# stream.stop_stream()
-# stream.close()
-# p.terminate()
+p = PyAudio()
+stream = p.open(format = p.get_format_from_width(1),
+				channels = 1,
+				rate = sampRate,
+				output = True)
+
+stream.write(voicedata)
+stream.stop_stream()
+stream.close()
+p.terminate()
 # **********************************************************************************************************************

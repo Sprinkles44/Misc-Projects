@@ -1,0 +1,6 @@
+
+sudo nano /etc/rc.local
+
+sudo amixer set PCM -- O
+sudo python 3 /home/pi/Emmit.py &
+sudo reboot
